@@ -125,7 +125,9 @@ test_dataset = MoleculeDataset(test_data)
 train_loader = GeoDataLoader(train_dataset, batch_size=32, shuffle=True)
 test_loader = GeoDataLoader(test_dataset, batch_size=32, shuffle=False)
 
+print("-" * 30)
 print("!!!IGNORE PREVIOUS WARNINGS!!!")
+print("-" * 30)
 
 class GNNModel(nn.Module):
 	def __init__(self, num_node_features, hidden_dim, output_dim):
