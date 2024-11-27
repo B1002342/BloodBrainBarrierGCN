@@ -2,6 +2,7 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem
 import torch
+import numpy as np
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader as GeoDataLoader
 from torch.utils.data import Dataset
@@ -14,21 +15,27 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import seaborn as sns
 import matplotlib.pyplot as plt
+from imblearn.over_sampling import RandomOverSampler
+from imblearn.under_sampling import RandomUnderSampler
 
-# Read the CSV file with correct delimiter and error handling
 df = pd.read_csv('SMILES_data.csv', sep='\t', on_bad_lines='warn')
+X_train, X_test, y_train, y_test = train_test_split(df['smiles'], df['p_np'], test_size=0.2, random_state=42)
+resampler = RandomOverSampler(random_state=42)
+X_train_resampled, y_train_resampled = resampler.fit_resample(X_train.values.reshape(-1, 1), y_train)
 
-# Check column names
-print(df.columns)
+print(f'Class distribution after oversampling: {pd.Series(y_train_resampled).value_counts()}')
 
-# Extract SMILES and labels
-smiles_list = df['smiles']
-labels = df['p_np']
+df_resampled = pd.DataFrame(X_train_resampled, columns=['smiles'])
+df_resampled['p_np'] = y_train_resampled
+smiles_train = df_resampled['smiles']
+labels_train = df_resampled['p_np']
 
-# Filter out invalid SMILES strings
+smiles_test = X_test
+labels_test = y_test
+
 valid_smiles = []
 valid_labels = []
-for smile, label in zip(smiles_list, labels):
+for smile, label in zip(smiles_test, labels_test):
 	try:
 		mol = Chem.MolFromSmiles(smile)
 		if mol is not None:
@@ -42,9 +49,21 @@ for smile, label in zip(smiles_list, labels):
 			valid_labels.append(label)
 	except Exception as e:
 		print(f"Invalid SMILES: {smile} - {e}")
-
-# Split data into training, testing, and validation sets
-smiles_train, smiles_test, labels_train, labels_test = train_test_split(valid_smiles, valid_labels, test_size=0.2, random_state=42, stratify=valid_labels)
+		
+for smile, label in zip(smiles_train, labels_train):
+		try:
+			mol = Chem.MolFromSmiles(smile)
+			if mol is not None:
+				# Sanitize the molecule
+				try:
+					Chem.SanitizeMol(mol)
+				except ValueError as e:
+					print(f"Error sanitizing SMILES: {smile} - {e}")
+					continue
+				valid_smiles.append(smile)
+				valid_labels.append(label)
+		except Exception as e:
+			print(f"Invalid SMILES: {smile} - {e}")
 
 def smiles_to_graph(smiles):
 	try:
@@ -102,7 +121,6 @@ def smiles_to_graph(smiles):
 
 # Convert SMILES to graph data for training, validation, and testing sets
 train_graphs = [graph for graph in [smiles_to_graph(smile) for smile in smiles_train] if graph is not None]
-# val_graphs = [graph for graph in [smiles_to_graph(smile) for smile in smiles_val] if graph is not None]
 test_graphs = [graph for graph in [smiles_to_graph(smile) for smile in smiles_test] if graph is not None]
 # print(test_graph)
 
@@ -164,7 +182,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 # Train the model
-for epoch in range(200):
+for epoch in range(100):
 	model.train()
 	total_loss = 0
 	for batch in tqdm(train_loader, desc=f'Epoch {epoch+1}'):
@@ -184,8 +202,10 @@ test_labels = []
 with torch.no_grad():
 	for batch in test_loader:
 		graphs, labels = batch
-		outputs = model(graphs)
+		outputs = model(graphs)  # Get the output probabilities
+		
 		_, predicted = torch.max(outputs, dim=1)
+		
 		test_preds.extend(predicted.cpu().numpy())
 		test_labels.extend(labels.cpu().numpy())
 
