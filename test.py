@@ -42,7 +42,6 @@ for smile, label in zip(smiles_list, labels):
 
 # Split data into training, testing, and validation sets
 smiles_train, smiles_test, labels_train, labels_test = train_test_split(valid_smiles, valid_labels, test_size=0.2, random_state=42, stratify=valid_labels)
-smiles_val, smiles_test, labels_val, labels_test = train_test_split(smiles_test, labels_test, test_size=0.5, random_state=42, stratify=labels_test)
 
 def smiles_to_graph(smiles):
 	try:
@@ -100,12 +99,12 @@ def smiles_to_graph(smiles):
 
 # Convert SMILES to graph data for training, validation, and testing sets
 train_graphs = [graph for graph in [smiles_to_graph(smile) for smile in smiles_train] if graph is not None]
-val_graphs = [graph for graph in [smiles_to_graph(smile) for smile in smiles_val] if graph is not None]
+# val_graphs = [graph for graph in [smiles_to_graph(smile) for smile in smiles_val] if graph is not None]
 test_graphs = [graph for graph in [smiles_to_graph(smile) for smile in smiles_test] if graph is not None]
+# print(test_graph)
 
 # Combine with labels
 train_data = list(zip(train_graphs, labels_train[:len(train_graphs)]))
-val_data = list(zip(val_graphs, labels_val[:len(val_graphs)]))
 test_data = list(zip(test_graphs, labels_test[:len(test_graphs)]))
 
 class MoleculeDataset(Dataset):
@@ -121,11 +120,9 @@ class MoleculeDataset(Dataset):
 
 # Create datasets and data loaders
 train_dataset = MoleculeDataset(train_data)
-val_dataset = MoleculeDataset(val_data)
 test_dataset = MoleculeDataset(test_data)
 
 train_loader = GeoDataLoader(train_dataset, batch_size=32, shuffle=True)
-val_loader = GeoDataLoader(val_dataset, batch_size=32, shuffle=False)
 test_loader = GeoDataLoader(test_dataset, batch_size=32, shuffle=False)
 
 print("!!!IGNORE PREVIOUS WARNINGS!!!")
