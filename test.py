@@ -29,8 +29,8 @@ test_loader = GeoDataLoader(test_dataset, batch_size=32, shuffle=False)
 test_preds = []
 test_labels = []
 
-model_path = 'gnn_model.pth'  # Path to your saved model
-model = GNNModel(num_node_features=5, hidden_dim=128, output_dim=2)  # Define your model architecture here
+model_path = 'gnn_model.pth'
+model = GNNModel(num_node_features=5, hidden_dim=128, output_dim=2)
 model.load_state_dict(torch.load(model_path))
 model.eval()
 with torch.no_grad():
@@ -41,17 +41,14 @@ with torch.no_grad():
 		test_preds.extend(predicted.cpu().numpy())
 		test_labels.extend(labels.cpu().numpy())
 
-# Calculate evaluation metrics
 accuracy = accuracy_score(test_labels, test_preds)
 precision = precision_score(test_labels, test_preds)
 recall = recall_score(test_labels, test_preds)
 
-# Print evaluation results
 print(f'Test Accuracy: {accuracy:.4f}')
 print(f'Test Precision: {precision:.4f}')
 print(f'Test Recall: {recall:.4f}')
 
-# Generate and plot confusion matrix
 cm = confusion_matrix(test_labels, test_preds)
 plt.figure(figsize=(6, 6))
 sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Class 0', 'Class 1'], yticklabels=['Class 0', 'Class 1'])
