@@ -15,13 +15,10 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# Read the CSV file with correct delimiter and error handling
-df = pd.read_csv('SMILES_data.csv', sep='\t', on_bad_lines='warn')
+df = pd.read_csv('B3DB_usable.csv', on_bad_lines='warn')
 
-# Check column names
 print(df.columns)
 
-# Extract SMILES and labels
 smiles_list = df['smiles']
 labels = df['p_np']
 
@@ -102,9 +99,7 @@ def smiles_to_graph(smiles):
 
 # Convert SMILES to graph data for training, validation, and testing sets
 train_graphs = [graph for graph in [smiles_to_graph(smile) for smile in smiles_train] if graph is not None]
-# val_graphs = [graph for graph in [smiles_to_graph(smile) for smile in smiles_val] if graph is not None]
 test_graphs = [graph for graph in [smiles_to_graph(smile) for smile in smiles_test] if graph is not None]
-# print(test_graph)
 
 # Combine with labels
 train_data = list(zip(train_graphs, labels_train[:len(train_graphs)]))

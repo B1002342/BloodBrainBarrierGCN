@@ -1,28 +1,45 @@
 import torch
-import numpy as np
-import matplotlib.pyplot as plt
+import pandas as pd
+from rdkit import Chem
+from rdkit.Chem import AllChem
+import torch
+from torch_geometric.data import Data
+from torch_geometric.loader import DataLoader as GeoDataLoader
+from torch.utils.data import Dataset
+import torch.nn as nn
+import torch.nn.functional as F
+from torch_geometric.nn import GCNConv, global_mean_pool
+from sklearn.model_selection import train_test_split
+from tqdm import tqdm
+from sklearn.metrics import accuracy_score, precision_score, recall_score
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import seaborn as sns
-from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
-from torch_geometric.data import DataLoader
-from gnn import GNNModel
+import matplotlib.pyplot as plt
+from gnn import GNNModel, smiles_to_graph, MoleculeDataset
 
-model_path = 'gnn_model.pth'  # Path to your saved model
-model = GNNModel(num_node_features=..., hidden_dim=..., output_dim=2)  # Define your model architecture here
-model.load_state_dict(torch.load(model_path))
-model.eval()  # Set model to evaluation mode
+df = pd.read_csv('SMILES_data.csv', sep='\t', on_bad_lines='warn')
+test_smiles = df['smiles']
+test_labels = df['p_np']
 
-# Prepare your test dataset and DataLoader (assumes you have test_loader defined)
-# test_loader = DataLoader(...)  # Define the test set DataLoader
+test_graphs = [graph for graph in [smiles_to_graph(smile) for smile in test_smiles] if graph is not None]
+test_data = list(zip(test_graphs, test_labels[:len(test_graphs)]))
+test_dataset = MoleculeDataset(test_data)
+test_loader = GeoDataLoader(test_dataset, batch_size=32, shuffle=False)
 
 test_preds = []
 test_labels = []
-with torch.no_grad():  # Disable gradient computation during inference
+
+model_path = 'gnn_model.pth'  # Path to your saved model
+model = GNNModel(num_node_features=5, hidden_dim=128, output_dim=2)  # Define your model architecture here
+model.load_state_dict(torch.load(model_path))
+model.eval()
+with torch.no_grad():
 	for batch in test_loader:
 		graphs, labels = batch
-		outputs = model(graphs)  # Forward pass through the model
-		_, predicted = torch.max(outputs, dim=1)  # Get the predicted class (0 or 1)
-		test_preds.extend(predicted.cpu().numpy())  # Move predictions to CPU and append to list
-		test_labels.extend(labels.cpu().numpy())  # Move true labels to CPU and append to list
+		outputs = model(graphs)
+		_, predicted = torch.max(outputs, dim=1)
+		test_preds.extend(predicted.cpu().numpy())
+		test_labels.extend(labels.cpu().numpy())
 
 # Calculate evaluation metrics
 accuracy = accuracy_score(test_labels, test_preds)
