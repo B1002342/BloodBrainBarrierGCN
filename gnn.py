@@ -40,7 +40,6 @@ for smile, label in zip(smiles_list, labels):
 	except Exception as e:
 		print(f"Invalid SMILES: {smile} - {e}")
 
-# Split data into training, testing, and validation sets
 smiles_train, smiles_test, labels_train, labels_test = train_test_split(valid_smiles, valid_labels, test_size=0.2, random_state=42, stratify=valid_labels)
 
 def smiles_to_graph(smiles):
@@ -76,7 +75,6 @@ def smiles_to_graph(smiles):
 			edge_list.append([bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()])
 			edge_list.append([bond.GetEndAtomIdx(), bond.GetBeginAtomIdx()])
 	
-			# Use GetBondType instead of IsAromatic and IsConjugated
 			bond_type = bond.GetBondType()
 			feature = [
 				bond_type == Chem.BondType.AROMATIC,
@@ -97,11 +95,8 @@ def smiles_to_graph(smiles):
 		print(f"Error processing SMILES: {smiles} - {e}")
 		return None
 
-# Convert SMILES to graph data for training, validation, and testing sets
 train_graphs = [graph for graph in [smiles_to_graph(smile) for smile in smiles_train] if graph is not None]
 test_graphs = [graph for graph in [smiles_to_graph(smile) for smile in smiles_test] if graph is not None]
-
-# Combine with labels
 train_data = list(zip(train_graphs, labels_train[:len(train_graphs)]))
 test_data = list(zip(test_graphs, labels_test[:len(test_graphs)]))
 
@@ -151,14 +146,10 @@ class GNNModel(nn.Module):
 	
 		return x
 
-# Initialize the GNN model
-model = GNNModel(num_node_features=5, hidden_dim=128, output_dim=2) # Assuming binary classification
-
-# Define the loss function and optimizer
+model = GNNModel(num_node_features=5, hidden_dim=128, output_dim=2)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-# Train the model
 for epoch in range(200):
 	model.train()
 	total_loss = 0
@@ -172,7 +163,6 @@ for epoch in range(200):
 		total_loss += loss.item()
 	print(f'Epoch {epoch+1}, Loss: {total_loss / len(train_loader)}')
 
-# Evaluate the model on the test set
 model.eval()
 test_preds = []
 test_labels = []
@@ -202,6 +192,6 @@ plt.ylabel('True')
 plt.title('Confusion Matrix')
 plt.show()
 
-model_path = 'gnn_model.pth'  # Choose the path where to save the model
+model_path = 'gnn_model.pth'
 torch.save(model.state_dict(), model_path)
 print(f'Model saved to {model_path}')
