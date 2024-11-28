@@ -103,6 +103,7 @@ plt.xlabel('Predicted')
 plt.ylabel('True')
 plt.title('Confusion Matrix')
 plt.show()
+plt.savefig('B3DB_test_confusion_matrix.png')
 
 model_path = 'gnn_model.pth'
 torch.save(model.state_dict(), model_path)
