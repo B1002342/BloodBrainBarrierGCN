@@ -31,25 +31,49 @@ def smiles_to_graph(smiles):
 	
 		atoms = mol.GetAtoms()
 		bonds = mol.GetBonds()
+		
+		functional_groups = {
+			"alcohol": Chem.MolFromSmarts("[CX4][OH]"),
+			"aldehyde": Chem.MolFromSmarts("[CX3H1](=O)[#6]"),
+			"ketone": Chem.MolFromSmarts("[CX3](=O)[#6]"),
+			"amine": Chem.MolFromSmarts("[NX3;H2,H1;!$(NC=O)]"),
+			"carboxylic_acid": Chem.MolFromSmarts("C(=O)[OH]"),
+			"aromatic_ring": Chem.MolFromSmarts("a"),
+			"ether": Chem.MolFromSmarts("[CX4][OX2][CX4]"),
+			"amide": Chem.MolFromSmarts("[NX3][CX3](=O)[#6]"),
+			"halogen": Chem.MolFromSmarts("[F,Cl,Br,I]"),
+		}
+		fg_counts = {fg: len(mol.GetSubstructMatches(pattern)) for fg, pattern in functional_groups.items()}
 	
 		atom_features = []
 		for atom in atoms:
 			feature = [
-				atom.GetAtomicNum(),                         # Atomic number
-				atom.GetDegree(),                            # Degree
-				atom.GetFormalCharge(),                      # Formal charge
-				atom.GetTotalNumHs(),                        # Total hydrogens
-				atom.GetNumRadicalElectrons(),               # Radical electrons
-				atom.GetIsAromatic(),                        # Aromaticity
-				Chem.Crippen.MolLogP(mol),                   # LogP (lipophilicity)
-				Chem.rdMolDescriptors.CalcTPSA(mol),         # Topological polar surface area
-				Chem.Lipinski.NumHDonors(mol),               # Number of hydrogen bond donors
-				Chem.Lipinski.NumHAcceptors(mol),            # Number of hydrogen bond acceptors
-				Chem.rdMolDescriptors.CalcNumRings(mol),     # Number of rings
-				Chem.rdMolDescriptors.CalcExactMolWt(mol),   # Molecular weight
-				atom.GetHybridization() == Chem.rdchem.HybridizationType.SP,   # SP hybridization
-				atom.GetHybridization() == Chem.rdchem.HybridizationType.SP2,  # SP2 hybridization
-				atom.GetHybridization() == Chem.rdchem.HybridizationType.SP3,
+				atom.GetAtomicNum(),                         					# Atomic number
+				atom.GetDegree(),                            					# Degree
+				atom.GetFormalCharge(),                      					# Formal charge
+				atom.GetTotalNumHs(),                        					# Total hydrogens
+				atom.GetNumRadicalElectrons(),               					# Radical electrons
+				atom.GetIsAromatic(),                        					# Aromaticity
+				Chem.Crippen.MolLogP(mol),                   					# LogP (lipophilicity)
+				Chem.rdMolDescriptors.CalcTPSA(mol),         					# Topological polar surface area
+				Chem.Lipinski.NumHDonors(mol),              					# Number of hydrogen bond donors
+				Chem.Lipinski.NumHAcceptors(mol),           					# Number of hydrogen bond acceptors
+				Chem.rdMolDescriptors.CalcNumRings(mol),    					# Number of rings
+				Chem.rdMolDescriptors.CalcExactMolWt(mol),   					# Molecular weight
+				Chem.Lipinski.NumRotatableBonds(mol),		 					# Number of rotatable bonds
+				Chem.rdMolDescriptors.CalcNumRings(mol),						# Number of ring structures
+				atom.GetHybridization() == Chem.rdchem.HybridizationType.SP,   	# SP hybridization
+				atom.GetHybridization() == Chem.rdchem.HybridizationType.SP2,  	# SP2 hybridization
+				atom.GetHybridization() == Chem.rdchem.HybridizationType.SP3,  	# SP3 hybridization
+				fg_counts["alcohol"],                        # Alcohol count
+				fg_counts["aldehyde"],                       # Aldehyde count
+				fg_counts["ketone"],                         # Ketone count
+				fg_counts["amine"],                          # Amine count
+				fg_counts["carboxylic_acid"],                # Carboxylic acid count
+				fg_counts["aromatic_ring"],                  # Aromatic ring count
+				fg_counts["ether"],                          # Ether count
+				fg_counts["amide"],                          # Amide count
+				fg_counts["halogen"],                        # Halogen count
 			]
 			atom_features.append(feature)
 	

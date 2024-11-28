@@ -59,7 +59,7 @@ print("-" * 30)
 print("!!!IGNORE PREVIOUS WARNINGS!!!")
 print("-" * 30)
 
-model = GNNModel(num_node_features=15, hidden_dim=128, output_dim=2)
+model = GNNModel(num_node_features=26, hidden_dim=128, output_dim=2)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 

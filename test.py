@@ -31,7 +31,7 @@ test_preds = []
 test_labels = []
 
 model_path = 'gnn_model.pth'
-model = GNNModel(num_node_features=15, hidden_dim=128, output_dim=2)
+model = GNNModel(num_node_features=26, hidden_dim=128, output_dim=2)
 model.load_state_dict(torch.load(model_path))
 model.eval()
 with torch.no_grad():
