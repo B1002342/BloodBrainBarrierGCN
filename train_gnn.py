@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 from gnn import GNNModel, smiles_to_graph, MoleculeDataset
 
 df = pd.read_csv('B3DB_usable.csv', on_bad_lines='warn')
+# df = pd.read_csv('SMILES_data.csv', sep='\t', on_bad_lines='warn')
 
 print(df.columns)
 
@@ -58,11 +59,11 @@ print("-" * 30)
 print("!!!IGNORE PREVIOUS WARNINGS!!!")
 print("-" * 30)
 
-model = GNNModel(num_node_features=5, hidden_dim=128, output_dim=2)
+model = GNNModel(num_node_features=15, hidden_dim=128, output_dim=2)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-for epoch in range(300):
+for epoch in range(200):
 	model.train()
 	total_loss = 0
 	for batch in tqdm(train_loader, desc=f'Epoch {epoch+1}'):

@@ -1,6 +1,7 @@
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem
+from rdkit.Chem import Descriptors, rdMolDescriptors, Lipinski
 import torch
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader as GeoDataLoader
@@ -34,11 +35,21 @@ def smiles_to_graph(smiles):
 		atom_features = []
 		for atom in atoms:
 			feature = [
-				atom.GetAtomicNum(),
-				atom.GetDegree(),
-				atom.GetFormalCharge(),
-				atom.GetTotalNumHs(),
-				atom.GetNumRadicalElectrons(),
+				atom.GetAtomicNum(),                         # Atomic number
+				atom.GetDegree(),                            # Degree
+				atom.GetFormalCharge(),                      # Formal charge
+				atom.GetTotalNumHs(),                        # Total hydrogens
+				atom.GetNumRadicalElectrons(),               # Radical electrons
+				atom.GetIsAromatic(),                        # Aromaticity
+				Chem.Crippen.MolLogP(mol),                   # LogP (lipophilicity)
+				Chem.rdMolDescriptors.CalcTPSA(mol),         # Topological polar surface area
+				Chem.Lipinski.NumHDonors(mol),               # Number of hydrogen bond donors
+				Chem.Lipinski.NumHAcceptors(mol),            # Number of hydrogen bond acceptors
+				Chem.rdMolDescriptors.CalcNumRings(mol),     # Number of rings
+				Chem.rdMolDescriptors.CalcExactMolWt(mol),   # Molecular weight
+				atom.GetHybridization() == Chem.rdchem.HybridizationType.SP,   # SP hybridization
+				atom.GetHybridization() == Chem.rdchem.HybridizationType.SP2,  # SP2 hybridization
+				atom.GetHybridization() == Chem.rdchem.HybridizationType.SP3,
 			]
 			atom_features.append(feature)
 	
@@ -54,7 +65,9 @@ def smiles_to_graph(smiles):
 				bond_type == Chem.BondType.DOUBLE,
 				bond_type == Chem.BondType.SINGLE,
 				bond_type == Chem.BondType.TRIPLE,
-				bond.IsInRing()
+				bond.IsInRing(),
+				bond.GetIsConjugated(),
+				bond.GetStereo()
 			]
 			edge_features.append(feature)
 			edge_features.append(feature)

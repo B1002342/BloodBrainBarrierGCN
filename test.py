@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 from gnn import GNNModel, smiles_to_graph, MoleculeDataset
 
 df = pd.read_csv('SMILES_data.csv', sep='\t', on_bad_lines='warn')
+# df = pd.read_csv('B3DB_usable.csv', on_bad_lines='warn')
 test_smiles = df['smiles']
 test_labels = df['p_np']
 
@@ -30,7 +31,7 @@ test_preds = []
 test_labels = []
 
 model_path = 'gnn_model.pth'
-model = GNNModel(num_node_features=5, hidden_dim=128, output_dim=2)
+model = GNNModel(num_node_features=15, hidden_dim=128, output_dim=2)
 model.load_state_dict(torch.load(model_path))
 model.eval()
 with torch.no_grad():
