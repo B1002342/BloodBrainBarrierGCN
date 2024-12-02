@@ -16,8 +16,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from gnn import GNNModel, smiles_to_graph, MoleculeDataset
 
-# df = pd.read_csv('B3DB_usable.csv', on_bad_lines='warn')
-df = pd.read_csv('SMILES_data.csv', sep='\t', on_bad_lines='warn')
+df = pd.read_csv('B3DB_usable.csv', on_bad_lines='warn')
+# df = pd.read_csv('SMILES_data.csv', sep='\t', on_bad_lines='warn')
 
 print(df.columns)
 
@@ -63,9 +63,15 @@ model = GNNModel(num_node_features=26, hidden_dim=128, output_dim=2)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
+training_losses = []
+training_accuracies = []
+
+# Training loop
 for epoch in range(200):
 	model.train()
 	total_loss = 0
+	correct_predictions = 0
+	total_samples = 0
 	for batch in tqdm(train_loader, desc=f'Epoch {epoch+1}'):
 		graphs, labels = batch
 		optimizer.zero_grad()
@@ -74,7 +80,29 @@ for epoch in range(200):
 		loss.backward()
 		optimizer.step()
 		total_loss += loss.item()
-	print(f'Epoch {epoch+1}, Loss: {total_loss / len(train_loader)}')
+
+		# Calculate accuracy
+		_, predicted = torch.max(outputs, dim=1)
+		correct_predictions += (predicted == labels).sum().item()
+		total_samples += labels.size(0)
+
+	# Average loss and accuracy for the epoch
+	epoch_loss = total_loss / len(train_loader)
+	epoch_accuracy = correct_predictions / total_samples
+	training_losses.append(epoch_loss)
+	training_accuracies.append(epoch_accuracy)
+	print(f'Epoch {epoch+1}, Loss: {epoch_loss:.4f}, Accuracy: {epoch_accuracy*100:.2f}%')
+	
+plt.figure(figsize=(8, 6))
+plt.plot(range(1, 201), training_losses, label='Training Loss', color='blue')
+plt.plot(range(1, 201), training_accuracies, label='Training Accuracy', color='green')
+plt.xlabel('Epoch')
+# plt.ylabel('Loss')
+plt.title('Training Curves')
+plt.legend()
+plt.grid(True)
+plt.savefig('training.png')
+plt.show()
 
 model.eval()
 test_preds = []

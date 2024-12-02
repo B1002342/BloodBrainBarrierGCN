@@ -17,8 +17,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from gnn import GNNModel, smiles_to_graph, MoleculeDataset
 
-# df = pd.read_csv('SMILES_data.csv', sep='\t', on_bad_lines='warn')
-df = pd.read_csv('B3DB_usable.csv', on_bad_lines='warn')
+df = pd.read_csv('SMILES_data.csv', sep='\t', on_bad_lines='warn')
+# df = pd.read_csv('B3DB_usable.csv', on_bad_lines='warn')
 test_smiles = df['smiles']
 test_labels = df['p_np']
 
