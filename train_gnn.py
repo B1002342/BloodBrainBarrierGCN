@@ -16,8 +16,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from gnn import GNNModel, smiles_to_graph, MoleculeDataset
 
-df = pd.read_csv('B3DB_usable.csv', on_bad_lines='warn')
-# df = pd.read_csv('SMILES_data.csv', sep='\t', on_bad_lines='warn')
+# df = pd.read_csv('B3DB_usable.csv', on_bad_lines='warn')
+df = pd.read_csv('SMILES_data.csv', sep='\t', on_bad_lines='warn')
 
 print(df.columns)
 
@@ -106,6 +106,7 @@ plt.title('Confusion Matrix')
 plt.show()
 plt.savefig('B3DB_test_confusion_matrix.png')
 
-model_path = 'gnn_model.pth'
+# model_path = 'gnn_model.pth'
+model_path = 'unbalanced_gnn_model.pth'
 torch.save(model.state_dict(), model_path)
 print(f'Model saved to {model_path}')

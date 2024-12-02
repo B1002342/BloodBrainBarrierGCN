@@ -17,8 +17,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from gnn import GNNModel, smiles_to_graph, MoleculeDataset
 
-df = pd.read_csv('SMILES_data.csv', sep='\t', on_bad_lines='warn')
-# df = pd.read_csv('B3DB_usable.csv', on_bad_lines='warn')
+# df = pd.read_csv('SMILES_data.csv', sep='\t', on_bad_lines='warn')
+df = pd.read_csv('B3DB_usable.csv', on_bad_lines='warn')
 test_smiles = df['smiles']
 test_labels = df['p_np']
 
@@ -30,7 +30,8 @@ test_loader = GeoDataLoader(test_dataset, batch_size=32, shuffle=False)
 test_preds = []
 test_labels = []
 
-model_path = 'gnn_model.pth'
+model_path = 'unbalanced_gnn_model.pth'
+# model_path = 'gnn_model.pth'
 model = GNNModel(num_node_features=26, hidden_dim=128, output_dim=2)
 model.load_state_dict(torch.load(model_path))
 model.eval()
