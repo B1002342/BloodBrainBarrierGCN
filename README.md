@@ -7,3 +7,5 @@ of nicotine derivatives, our model provides insight into the molecular features 
 penetration, offering a stepping stone toward designing safer nicotine analogs. The goal of this work
 is not merely to predict BBB permeability but to interpret the underlying molecular patterns that
 differentiate compounds that cross the barrier from those that do not.
+
+We exploit the graph structure of biological molecules and accordingly use a GNN for classificiation. Our model is trained on the [Blood-Brain Barrier Database (B3DB)](https://github.com/theochem/B3DB?tab=readme-ov-file). We additionally scrape 172 CAS (Chemical Abstract Service) numbers different nicotine derivatives from [the list of Cymitquimica’s nicotine analog](https://cymitquimica.com/categories/1828/?srsltid=AfmBOoq192jP0XqDRimxlFKcuX8rhkztsdPnmg0H4XYFqxYG5MMRi9ij) and generate SMILES for 164 of them from the [PubChem molecule database](https://pubchem.ncbi.nlm.nih.gov). To the best of our knowledge, there is no other dataset of this type available, and there is ample room for growth. 
